@@ -1,9 +1,10 @@
 import 'package:demo_product/resources/common_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:demo_product/model/Product1.dart';
+import 'package:demo_product/model/Product.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
+import 'package:flutter_svg/flutter_svg.dart';
 
 void main() {
   runApp(MyApp(products: fetchProducts()));
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -41,20 +43,78 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-            centerTitle: true,
-            title: const Text("Danh sách sản phâm",
-                textAlign: TextAlign.center)),
-        body: Center(
-          child: FutureBuilder<List<Product1>>(
-            future: products,
-            builder: (context, snapshot) {
-              return snapshot.hasData
-                  ? ProductBoxList(items: snapshot.data as List<Product1>)
-                  : const Center(child: CircularProgressIndicator());
-            },
-          ),
-        ));
+      appBar: AppBar(
+          centerTitle: true,
+          title:
+              const Text("Danh sách sản phẩm", textAlign: TextAlign.center)),
+      body: Center(
+        child: FutureBuilder<List<Product1>>(
+          future: products,
+          builder: (context, snapshot) {
+            return snapshot.hasData
+                ? ProductBoxList(items: snapshot.data as List<Product1>)
+                : const Center(child: CircularProgressIndicator());
+          },
+        ),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: const EdgeInsets.all(5),
+          children: [
+            DrawerHeader(
+              child: Container(
+                decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                    color: Colors.transparent),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Image.network(
+                      "https://annamaroma.com/wp-content/uploads/2022/08/AnyConv.com__logo-an-annam.webp",
+                      fit: BoxFit.fill,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            ListTile(
+              title: const Text(
+                "Trang chủ",
+                style: TextStyle(color: Colors.red),
+              ),
+              onTap: () {},
+              leading: const Icon(
+                Icons.home,
+                color: Colors.red,
+              ),
+            ),
+            ListTile(
+              title: const Text(
+                "Giỏ hàng",
+                style: TextStyle(color: Colors.red),
+              ),
+              onTap: () {
+                openDialog(context);
+              },
+              leading: const Icon(
+                Icons.shopping_cart,
+                color: Colors.red,
+              ),
+            ),
+            ListTile(
+                title: const Text(
+                  "Đơn hàng",
+                  style: TextStyle(color: Colors.red),
+                ),
+                onTap: () {},
+                leading: SvgPicture.asset(
+                  "assets/images/ic_order.svg",
+                  color: Colors.red,
+                ))
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -84,6 +144,30 @@ class ProductBoxList extends StatelessWidget {
   }
 }
 
+openDialog(BuildContext context) {
+  // This is the ok button
+  Widget ok = TextButton(
+    child: const Text("Okay"),
+    onPressed: () {
+      Navigator.of(context).pop();
+    },
+  );
+  // show the alert dialog
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text("I am Here!"),
+        content: const Text("I appeared because you pressed the button!"),
+        actions: [
+          ok,
+        ],
+        elevation: 5,
+      );
+    },
+  );
+}
+
 class ProductPage extends StatelessWidget {
   const ProductPage({Key? key, required this.item}) : super(key: key);
   final Product1 item;
@@ -105,7 +189,7 @@ class ProductPage extends StatelessWidget {
                 Image.network(item.imglink),
                 Expanded(
                     child: Container(
-                        padding: EdgeInsets.all(5),
+                        padding: const EdgeInsets.all(5),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
@@ -148,8 +232,24 @@ class ProductBox extends StatelessWidget {
                             Text(item.product_name,
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold)),
-                            Text("Price: ${item.price}"),
-                            Text("Sale_Price : ${item.sale_price}"),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text("Price : "),
+                                Text(
+                                  "${item.price}",
+                                  style: item.sale_price > 0
+                                      ? const TextStyle(
+                                          decoration:
+                                              TextDecoration.lineThrough,
+                                          decorationColor: Colors.red)
+                                      : const TextStyle(),
+                                )
+                              ],
+                            ),
+                            item.sale_price > 0
+                                ? Text("Sale_Price : ${item.sale_price}")
+                                : const Text(""),
                           ],
                         )))
               ]),
