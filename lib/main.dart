@@ -5,6 +5,12 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:demo_product/constants/StringCommon.dart';
+import 'package:get/get.dart';
+import 'package:demo_product/ui/login/login_form.dart';
+import 'package:provider/provider.dart';
+
+import 'model/CounterModel.dart';
 
 void main() {
   runApp(MyApp(products: fetchProducts()));
@@ -18,15 +24,22 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(
-        title: 'Product Navigation demo home page',
-        products: products,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<CounterModel>(
+            create: (context) => CounterModel()),
+      ],
+      // return GetMaterialApp(
+      //   title: 'Flutter Demo',
+      //   theme: ThemeData(
+      //     primarySwatch: Colors.blue,
+      //   ),
+      child: GetMaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: MyHomePage(
+          title: 'Product Navigation demo home page',
+          products: products,
+        ),
       ),
     );
   }
@@ -69,13 +82,20 @@ class MyHomePage extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Image.network(
-                      "https://annamaroma.com/wp-content/uploads/2022/08/AnyConv.com__logo-an-annam.webp",
-                      fit: BoxFit.fill,
-                    ),
+                    TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LoginPage(context)));
+                        },
+                        child: const Text("Đăng nhập"))
                   ],
                 ),
               ),
+            ),
+            const Divider(
+              height: 5,
             ),
             ListTile(
               title: const Text(
@@ -108,9 +128,9 @@ class MyHomePage extends StatelessWidget {
                 ),
                 onTap: () {},
                 leading: SvgPicture.asset(
-                  "assets/images/ic_order.svg",
+                  StringCommon.iconOrder,
                   color: Colors.red,
-                ))
+                )),
           ],
         ),
       ),
@@ -174,6 +194,7 @@ class ProductPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final counterModel = Provider.of<CounterModel>(context);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -181,29 +202,32 @@ class ProductPage extends StatelessWidget {
       ),
       body: Center(
         child: Container(
-          padding: const EdgeInsets.all(0),
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Image.network(item.imglink),
-                Expanded(
-                    child: Container(
-                        padding: const EdgeInsets.all(5),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            Text(item.product_name,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
-                            Text("Price: ${item.price}"),
-                            inputWidget(
-                                label: "Name",
-                                hintText: "Input Name",
-                                controller: null)
-                          ],
-                        )))
-              ]),
+          padding: const EdgeInsets.all(10),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Image.network(item.imglink),
+                  Expanded(
+                      child: Container(
+                          padding: const EdgeInsets.all(5),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: <Widget>[
+                              Text(item.product_name,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
+                              Text("Price: ${item.price}"),
+                              inputWidget(
+                                  label: "${counterModel.getCounter()}",
+                                  hintText: "abc",
+                                  controller: null)
+                            ],
+                          )))
+                ]),
+          ),
         ),
       ),
     );
@@ -227,13 +251,13 @@ class ProductBox extends StatelessWidget {
                     child: Container(
                         padding: const EdgeInsets.all(5),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             Text(item.product_name,
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold)),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 const Text("Price : "),
                                 Text(
@@ -247,9 +271,11 @@ class ProductBox extends StatelessWidget {
                                 )
                               ],
                             ),
-                            item.sale_price > 0
-                                ? Text("Sale_Price : ${item.sale_price}")
-                                : const Text(""),
+                            Visibility(
+                                visible: item.sale_price > 0,
+                                child: Text(
+                                  "Sale_Price : ${item.sale_price}",
+                                ))
                           ],
                         )))
               ]),
