@@ -189,9 +189,9 @@ openDialog(BuildContext context) {
 }
 
 class ProductPage extends StatelessWidget {
-  const ProductPage({Key? key, required this.item}) : super(key: key);
+  ProductPage({Key? key, required this.item}) : super(key: key);
   final Product1 item;
-
+  TextEditingController controller = TextEditingController();
   @override
   Widget build(BuildContext context) {
     final counterModel = Provider.of<CounterModel>(context);
@@ -200,34 +200,31 @@ class ProductPage extends StatelessWidget {
         centerTitle: true,
         title: const Text("Chi tiết sản phẩm"),
       ),
-      body: Center(
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Image.network(item.imglink),
-                  Expanded(
-                      child: Container(
-                          padding: const EdgeInsets.all(5),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: <Widget>[
-                              Text(item.product_name,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold)),
-                              Text("Price: ${item.price}"),
-                              inputWidget(
-                                  label: "${counterModel.getCounter()}",
-                                  hintText: "abc",
-                                  controller: null)
-                            ],
-                          )))
-                ]),
-          ),
+      body: Container(
+        padding: const EdgeInsets.all(10),
+        child: ListView(
+          scrollDirection: Axis.vertical,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Image.network(item.imglink),
+                Text(item.product_name),
+                Text(
+                    "Price: ${item.sale_price == 0 ? item.price : item.sale_price}"),
+                inputWidget(
+                    label: "Số lượng",
+                    hintText: "Nhập số lượng sản phẩm",
+                    controller: controller),
+                buttonWidget(
+                    label: "Đặt hàng",
+                    colorButton: Colors.amber,
+                    onPress: () {
+                      counterModel.setCounter(int.parse(controller.text));
+                    }),
+              ],
+            )
+          ],
         ),
       ),
     );
